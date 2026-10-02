@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>خرید استارز تلگرام | Telegram Stars 3D</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#09090b',
+            surface: '#0f1013',
+            elevated: '#18191e',
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              glow: '#ffb700',
+            }
+          },
+          boxShadow: {
+            'tactile-gold': '0 6px 0 0 #b45309, 0 10px 20px -2px rgba(245, 158, 11, 0.45)',
+            'tactile-pressed': '0 2px 0 0 #b45309, 0 4px 10px -1px rgba(245, 158, 11, 0.3)',
+            'glass-elevated': '0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
+            'chip-glow': '0 4px 14px 0 rgba(245, 158, 11, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Vazirmatn & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #09090b;
+      color: #fafafa;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .font-num {
+      font-family: 'Outfit', sans-serif;
+    }
+    /* 3D Glassmorphism Sheen */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(24, 25, 30, 0.75) 0%, rgba(15, 16, 19, 0.85) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    }
+    .clay-chip {
+      background: linear-gradient(145deg, #1a1b22, #121317);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-chip.active {
+      background: linear-gradient(145deg, #2a2211, #1e1708);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 230, 150, 0.4);
+      transform: translateY(-2px);
+    }
+    /* 3D Tactile Button */
+    .btn-3d-gold {
+      background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+      box-shadow: 0 6px 0 0 #92400e, 0 12px 25px -4px rgba(245, 158, 11, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: all 0.12s ease-in-out;
+    }
+    .btn-3d-gold:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 0 #92400e, 0 4px 10px -2px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    /* Custom 3D Slider styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 10px;
+      cursor: pointer;
+      background: #18191e;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      height: 26px;
+      width: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fef08a, #f59e0b, #b45309);
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 12px #f59e0b;
+      border: 2px solid #ffffff;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:active {
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-obsidian flex flex-col items-center justify-start p-4 pb-24 relative overflow-x-hidden selection:bg-gold-500/30">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold-500/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-0 right-0 w-80 h-80 bg-amber-600/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+
+  <!-- Header / VIP Badge Bar -->
+  <header class="w-full max-w-md flex items-center justify-between py-2 px-1">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-gold-600 to-amber-300 p-0.5 shadow-md flex items-center justify-center">
+        <span class="text-sm">⭐️</span>
+      </div>
+      <div>
+        <h1 class="text-xs font-bold text-zinc-400 tracking-wider uppercase">AccLand Store</h1>
+        <p class="text-sm font-extrabold text-white">خرید استارز تلگرام</p>
+      </div>
+    </div>
+
+    <!-- Floating VIP Badge -->
+    <div id="vipBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-sm">
+      <img id="userAvatar" src="https://telegram.org/img/t_logo.png" alt="User" class="w-5 h-5 rounded-full border border-gold-500/50 object-cover">
+      <span id="userName" class="text-xs font-semibold text-zinc-300 font-num">VIP User</span>
+      <span class="text-[10px] px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-400 font-bold border border-gold-500/30">Fragment</span>
+    </div>
+  </header>
+
+  <!-- Interactive 3D Star Canvas Container (Modern Slate Backdrop with Ambient Radial Spotlight) -->
+  <div class="relative w-full max-w-md h-60 my-2 rounded-2xl overflow-hidden flex items-center justify-center border border-white/[0.08] shadow-2xl bg-gradient-to-b from-[#161B22] via-[#0E131A] to-[#0A0D12]">
+    <!-- Ambient Radial Spotlight behind 3D Star -->
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(255,210,20,0.18)_0%,rgba(22,27,34,0.4)_50%,transparent_80%)] pointer-events-none"></div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="starCanvas" class="w-full h-full cursor-grab active:cursor-grabbing relative z-10"></canvas>
+
+    <!-- Overlay Badge Indicator -->
+    <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/40 border border-white/10 backdrop-blur-md flex items-center gap-1.5 pointer-events-none z-20">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="text-[11px] font-medium text-zinc-300">تحویل آنی و رسمی</span>
+    </div>
+
+    <!-- Speed / Pulse Tier Meter -->
+    <div class="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 backdrop-blur-md flex items-center gap-1.5 pointer-events-none z-20">
+      <span class="text-xs text-gold-400 font-num font-bold" id="starsDisplayHero">100 ⭐️</span>
+    </div>
+  </div>
+
+  <!-- Main Configurator Card -->
+  <main class="w-full max-w-md flex flex-col gap-4">
+
+    <!-- Preset 3D Tier Chips -->
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center justify-between px-1">
+        <label class="text-xs font-bold text-zinc-400">بسته‌های محبوب استارز:</label>
+        <span class="text-[11px] text-gold-400 font-semibold">تخفیف ویژه سفارش تجاری</span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2.5">
+        <button onclick="setStars(50)" class="clay-chip py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="50">
+          <span class="font-num font-bold text-base text-white">50 ⭐️</span>
+          <span class="text-[10px] text-zinc-400 font-num">$0.98</span>
+        </button>
+
+        <button onclick="setStars(100)" class="clay-chip active py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="100">
+          <span class="font-num font-bold text-base text-white">100 ⭐️</span>
+          <span class="text-[10px] text-zinc-400 font-num">$1.95</span>
+        </button>
+
+        <button onclick="setStars(250)" class="clay-chip py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="250">
+          <span class="font-num font-bold text-base text-white">250 ⭐️</span>
+          <span class="text-[10px] text-zinc-400 font-num">$4.88</span>
+        </button>
+
+        <button onclick="setStars(500)" class="clay-chip py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="500">
+          <span class="font-num font-bold text-base text-white">500 ⭐️</span>
+          <span class="text-[10px] text-emerald-400 font-num font-semibold">3% تخفیف</span>
+        </button>
+
+        <button onclick="setStars(1000)" class="clay-chip py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="1000">
+          <span class="font-num font-bold text-base text-white">1,000 ⭐️</span>
+          <span class="text-[10px] text-emerald-400 font-num font-semibold">5% تخفیف</span>
+        </button>
+
+        <button onclick="setStars(2500)" class="clay-chip py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" data-stars="2500">
+          <span class="font-num font-bold text-base text-white">2,500 ⭐️</span>
+          <span class="text-[10px] text-emerald-400 font-num font-semibold">8% تخفیف</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive 3D Slider & Custom Numeric Input -->
+    <div class="glass-card p-4 rounded-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <label class="text-xs font-bold text-zinc-300">تعداد دلخواه استارز:</label>
+        <div class="flex items-center gap-1.5 bg-black/50 border border-white/10 px-3 py-1 rounded-xl">
+          <input type="number" id="starsInput" min="50" max="10000" step="10" value="100" class="w-16 bg-transparent text-left font-num font-extrabold text-gold-400 text-lg outline-none">
+          <span class="text-sm">⭐️</span>
+        </div>
+      </div>
+
+      <!-- Range Slider -->
+      <div class="py-1">
+        <input type="range" id="starsSlider" min="50" max="5000" step="25" value="100">
+      </div>
+
+      <div class="flex justify-between text-[11px] text-zinc-500 font-num px-1">
+        <span>50 Stars</span>
+        <span>1,000</span>
+        <span>2,500</span>
+        <span>5,000+</span>
+      </div>
+    </div>
+
+    <!-- Live Dual-Price Calculation Card -->
+    <div class="glass-card p-4 rounded-2xl flex flex-col gap-2.5 border border-gold-500/20 bg-gradient-to-br from-[#1a1710] to-[#0f1013]">
+      <div class="flex items-center justify-between text-xs text-zinc-400">
+        <span>مبلغ کل سفارش:</span>
+        <span class="font-num text-xs text-gold-400/90" id="usdPriceLabel">$1.95 USD</span>
+      </div>
+
+      <div class="flex items-baseline justify-between pt-1">
+        <span class="text-xs text-zinc-300">معادل تومانی (TGJU/نوبیتکس):</span>
+        <div class="flex items-baseline gap-1">
+          <span id="tomanCounter" class="text-2xl font-black font-num text-white tracking-tight">510,000</span>
+          <span class="text-xs font-bold text-zinc-400">تومان</span>
+        </div>
+      </div>
+
+      <!-- Feature Checklist -->
+      <div class="mt-2 pt-2.5 border-t border-white/[0.06] grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400">✓</span>
+          <span>واریز مستقیم فرگمنت</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400">✓</span>
+          <span>تسویه با کارت‌به‌کارت</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400">✓</span>
+          <span>ارسال آنی رسید به خریدار</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-emerald-400">✓</span>
+          <span>پشتیبانی ۲۴ ساعته</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Tactile Action CTA Button -->
+    <button id="orderBtn" onclick="submitOrder()" class="btn-3d-gold w-full py-4 rounded-2xl text-center font-extrabold text-zinc-950 text-base flex items-center justify-center gap-2 cursor-pointer shadow-tactile-gold mt-1">
+      <span class="text-lg">💳</span>
+      <span>تأیید و پرداخت نهایی</span>
+      <span class="font-num text-sm bg-black/15 px-2 py-0.5 rounded-full" id="btnPriceBadge">510,000 T</span>
+    </button>
+  </main>
+
+  <!-- 3D Three.js & Logic Script -->
+  <script>
+    // Initialize Telegram WebApp
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      tg.enableClosingConfirmation();
+      try {
+        tg.setHeaderColor('#09090b');
+        tg.setBackgroundColor('#09090b');
+      } catch (e) {}
+    }
+
+    // Extract User Metadata from Telegram
+    let currentUserId = 0;
+    let currentUsername = 'AccLandUser';
+    if (tg?.initDataUnsafe?.user) {
+      const u = tg.initDataUnsafe.user;
+      currentUserId = u.id;
+      currentUsername = u.username || `${u.first_name} ${u.last_name || ''}`.trim();
+      document.getElementById('userName').textContent = `@${u.username || u.first_name}`;
+      if (u.photo_url) {
+        document.getElementById('userAvatar').src = u.photo_url;
+      }
+    }
+
+    // Haptic Feedback Helper
+    function triggerHaptic(type = 'medium') {
+      try {
+        if (tg?.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred(type);
+        }
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 3D Three.js Plump Cute Star Scene (Glossy Toy Finish)
+    // =========================================================================
+    const canvas = document.getElementById('starCanvas');
+    const scene = new THREE.Scene();
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+    camera.position.z = 5.8;
+
+    // Renderer with DPR Clamping (<= 2)
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    if (renderer.toneMapping !== undefined) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+    }
+
+    // Dynamic High-Quality Lighting Setup (Warm Golden Studio Calibration)
+    // 1. Soft warm white Ambient Light
+    const ambientLight = new THREE.AmbientLight(0xfffae6, 1.15);
+    scene.add(ambientLight);
+
+    // 2. Key Directional Light (Warm white #FFF8E7 - prevents bleaching out golden yellow)
+    const keyLight = new THREE.DirectionalLight(0xfff8e7, 1.65);
+    keyLight.position.set(3.5, 4.5, 5.0);
+    scene.add(keyLight);
+
+    // 3. Fill Directional Light (Saturated deep warm amber-orange #FF7A00 to accent deep yellow tones)
+    const fillLight = new THREE.DirectionalLight(0xff7a00, 1.25);
+    fillLight.position.set(-4.0, -3.5, 2.0);
+    scene.add(fillLight);
+
+    // 4. Back Key Directional Light (Soft warm golden light for 360-degree rotation vibrancy)
+    const backKeyLight = new THREE.DirectionalLight(0xffe082, 1.4);
+    backKeyLight.position.set(-3.5, 4.0, -5.0);
+    scene.add(backKeyLight);
+
+    // 5. Back Fill Directional Light (Warm amber)
+    const backFillLight = new THREE.DirectionalLight(0xff8000, 1.1);
+    backFillLight.position.set(3.5, -3.0, -4.0);
+    scene.add(backFillLight);
+
+    // 6. Soft Rim Point Light placed slightly behind to provide golden rim-glow
+    const rimLight = new THREE.PointLight(0xffd54f, 1.8, 12);
+    rimLight.position.set(0, 2.0, -2.5);
+    scene.add(rimLight);
+
+    // 7. Front subtle warm soft light for clean specular reflection
+    const frontSoftLight = new THREE.DirectionalLight(0xfff8e7, 0.45);
+    frontSoftLight.position.set(0, 0, 6.0);
+    scene.add(frontSoftLight);
+
+    // Generate Cute Chubby 5-Point Star with Smooth Rounded Corners
+    function createChubbyStarShape(outerRadius = 1.62, innerRadius = 0.66, roundFactorTip = 0.18, roundFactorValley = 0.22) {
+      const shape = new THREE.Shape();
+      const points = 5;
+      const totalVertices = 10;
+      const step = Math.PI / points;
+
+      // Calculate all 10 base star vertices
+      const vertices = [];
+      for (let i = 0; i < totalVertices; i++) {
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = i * step - Math.PI / 2;
+        vertices.push({
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+          isTip: i % 2 === 0
+        });
+      }
+
+      // Smoothly connect all vertices using quadratic curves for soft, pillowy transitions
+      for (let i = 0; i < totalVertices; i++) {
+        const curr = vertices[i];
+        const prev = vertices[(i - 1 + totalVertices) % totalVertices];
+        const next = vertices[(i + 1) % totalVertices];
+        const roundFactor = curr.isTip ? roundFactorTip : roundFactorValley;
+
+        // Cut back along incoming edge
+        const startX = curr.x + (prev.x - curr.x) * roundFactor;
+        const startY = curr.y + (prev.y - curr.y) * roundFactor;
+
+        // Cut forward along outgoing edge
+        const endX = curr.x + (next.x - curr.x) * roundFactor;
+        const endY = curr.y + (next.y - curr.y) * roundFactor;
+
+        if (i === 0) {
+          shape.moveTo(startX, startY);
+        } else {
+          shape.lineTo(startX, startY);
+        }
+        // Smooth curve over the vertex
+        shape.quadraticCurveTo(curr.x, curr.y, endX, endY);
+      }
+      shape.closePath();
+      return shape;
+    }
+
+    const starShape = createChubbyStarShape(1.62, 0.66, 0.18, 0.22);
+
+    // Deep Plump Extrusion with Generous Rounded Bevels
+    const extrudeSettings = {
+      depth: 0.35,
+      bevelEnabled: true,
+      bevelThickness: 0.26,
+      bevelSize: 0.22,
+      bevelOffset: 0,
+      bevelSegments: 16,
+      steps: 4,
+    };
+
+    const starGeometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
+    starGeometry.center();
+    starGeometry.computeVertexNormals();
+
+    // Normalize Bounding-Box UVs for Vertical Color Gradient
+    starGeometry.computeBoundingBox();
+    const bbox = starGeometry.boundingBox;
+    const sizeX = bbox.max.x - bbox.min.x;
+    const sizeY = bbox.max.y - bbox.min.y;
+    const pos = starGeometry.attributes.position;
+    const uvs = starGeometry.attributes.uv;
+    if (uvs && pos) {
+      for (let i = 0; i < pos.count; i++) {
+        const u = (pos.getX(i) - bbox.min.x) / sizeX;
+        const v = (pos.getY(i) - bbox.min.y) / sizeY;
+        uvs.setXY(i, u, v);
+      }
+      uvs.needsUpdate = true;
+    }
+
+    // Vivid Saturated Golden-Yellow to Deep Amber Gradient Texture
+    function createJuicyStarTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 512;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 512, 0, 0); // bottom to top
+      grad.addColorStop(0.0, '#D95D00');   // deep amber-orange shadow at base
+      grad.addColorStop(0.20, '#FF8000');  // rich warm orange at bottom tips
+      grad.addColorStop(0.48, '#FF9E00');  // deep amber-yellow
+      grad.addColorStop(0.75, '#FFAE00');  // vivid saturated golden-yellow core
+      grad.addColorStop(0.92, '#FFC400');  // rich golden yellow
+      grad.addColorStop(1.0, '#FFD600');   // pure bright saturated yellow at highlight tip
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 256, 512);
+
+      const texture = new THREE.CanvasTexture(c);
+      texture.wrapS = THREE.ClampToEdgeWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+      texture.needsUpdate = true;
+      if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+      return texture;
+    }
+
+    // Glossy Candy / Clay Toy Material (Vivid Saturated Golden Yellow)
+    const juicyTexture = createJuicyStarTexture();
+    const starMaterial = new THREE.MeshPhysicalMaterial({
+      map: juicyTexture,
+      color: 0xffb800,
+      roughness: 0.15,
+      metalness: 0.06,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.10,
+      reflectivity: 0.85,
+      emissive: 0xff8c00,
+      emissiveIntensity: 0.12,
+    });
+    starMaterial.needsUpdate = true;
+
+    const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+    scene.add(starMesh);
+
+    // Subtle, Elegant Translucent Bokeh Ambient Specks
+    const particleCount = 12;
+    const particleGeometry = new THREE.SphereGeometry(0.045, 8, 8);
+    const particleMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffeb99,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const particleGroup = new THREE.Group();
+
+    for (let i = 0; i < particleCount; i++) {
+      const mesh = new THREE.Mesh(particleGeometry, particleMaterial);
+      const angle = (i / particleCount) * Math.PI * 2 + Math.random() * 0.4;
+      const radius = 2.1 + Math.random() * 0.7;
+      const y = (Math.random() - 0.5) * 1.8;
+      mesh.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      particleGroup.add(mesh);
+    }
+    scene.add(particleGroup);
+
+    // Animation & Reactive Physics State
+    let extraSpinVelocity = 0;
+    let extraSpinAngle = 0;
+    let userDragAngleX = 0;
+    let userDragAngleY = 0;
+    let currentScale = 1.0;
+    let targetScale = 1.0;
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
+
+      // Dampen extra spin burst from tier selections
+      extraSpinAngle += extraSpinVelocity;
+      extraSpinVelocity *= 0.92;
+
+      // Gentle, friendly sway so the front face and 3D pillowy bevels are always beautifully presented
+      const idleSwayY = Math.sin(elapsedTime * 0.9) * 0.32;
+      const idleSwayX = Math.sin(elapsedTime * 1.3) * 0.10;
+      const idleBobY = Math.sin(elapsedTime * 1.8) * 0.12;
+
+      starMesh.rotation.y = userDragAngleY + idleSwayY + extraSpinAngle;
+      starMesh.rotation.x = userDragAngleX + idleSwayX;
+      starMesh.rotation.z = Math.sin(elapsedTime * 0.7) * 0.05;
+      starMesh.position.y = idleBobY;
+
+      // Pulse scaling interpolation
+      currentScale += (targetScale - currentScale) * 0.15;
+      starMesh.scale.set(currentScale, currentScale, currentScale);
+      if (Math.abs(targetScale - 1.0) > 0.001) {
+        targetScale += (1.0 - targetScale) * 0.08;
+      }
+
+      // Gentle drift for subtle ambient bokeh
+      particleGroup.rotation.y += 0.003;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Trigger 3D Star pulse & spin burst on tier changes
+    function triggerStarReaction(multiplier = 1.0) {
+      targetScale = 1.16;
+      extraSpinVelocity = 0.22 * Math.min(2.0, multiplier);
+    }
+
+    // Responsive Canvas Resize
+    function handleResize() {
+      if (!canvas) return;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (canvas.width !== width || canvas.height !== height) {
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+    }
+    window.addEventListener('resize', handleResize);
+
+    // Touch / Drag Rotate on Canvas
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    canvas.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - previousMousePosition.x;
+      const deltaY = e.clientY - previousMousePosition.y;
+      userDragAngleY += deltaX * 0.012;
+      userDragAngleX += deltaY * 0.010;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; });
+    window.addEventListener('pointercancel', () => { isDragging = false; });
+
+    // =========================================================================
+    // Product Selection & Live Dual-Price Engine
+    // =========================================================================
+    let currentStars = 100;
+    let baseTomanRate = 261784; // Live Nobitex default
+    let unitPriceUsd = 0.0195;
+
+    // Fetch live currency rates from backend
+    async function fetchLiveRates() {
+      try {
+        const resp = await fetch('/api/stars/pricing?stars=100');
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.toman_rate) baseTomanRate = data.toman_rate;
+          if (data.unit_price_usd) unitPriceUsd = data.unit_price_usd;
+          updateCalculations();
+        }
+      } catch (e) {
+        console.log('Using local currency defaults.');
+      }
+    }
+    fetchLiveRates();
+
+    function setStars(qty) {
+      currentStars = parseInt(qty);
+      document.getElementById('starsInput').value = currentStars;
+      document.getElementById('starsSlider').value = Math.min(5000, currentStars);
+      triggerHaptic('medium');
+      triggerStarReaction(currentStars / 250);
+      updateActiveChipUI();
+      updateCalculations();
+    }
+
+    function updateActiveChipUI() {
+      document.querySelectorAll('.clay-chip').forEach(btn => {
+        const chipVal = parseInt(btn.getAttribute('data-stars'));
+        if (chipVal === currentStars) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    // Slider listener
+    const slider = document.getElementById('starsSlider');
+    slider.addEventListener('input', (e) => {
+      currentStars = parseInt(e.target.value);
+      document.getElementById('starsInput').value = currentStars;
+      updateActiveChipUI();
+      updateCalculations();
+      triggerHaptic('selection');
+    });
+
+    // Custom Input listener
+    const numInput = document.getElementById('starsInput');
+    numInput.addEventListener('input', (e) => {
+      let val = parseInt(e.target.value) || 50;
+      if (val < 50) val = 50;
+      currentStars = val;
+      slider.value = Math.min(5000, currentStars);
+      updateActiveChipUI();
+      updateCalculations();
+    });
+
+    // Smooth counter animation
+    function animateValue(elementId, start, end, duration) {
+      const obj = document.getElementById(elementId);
+      if (!obj) return;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const current = Math.floor(progress * (end - start) + start);
+        obj.textContent = current.toLocaleString('en-US');
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    let previousToman = 510000;
+
+    function updateCalculations() {
+      // Tiered discount
+      let discount = 0.0;
+      if (currentStars >= 2500) discount = 0.08;
+      else if (currentStars >= 1000) discount = 0.05;
+      else if (currentStars >= 500) discount = 0.03;
+
+      const effectiveUnitUsd = unitPriceUsd * (1.0 - discount);
+      let totalUsd = Math.round(currentStars * effectiveUnitUsd * 100) / 100;
+      if (totalUsd < 0.95 && currentStars >= 50) totalUsd = 0.95;
+
+      const rawToman = Math.round((totalUsd * baseTomanRate) / 1000) * 1000;
+
+      // Update UI elements
+      document.getElementById('starsDisplayHero').textContent = `${currentStars.toLocaleString('en-US')} ⭐️`;
+      document.getElementById('usdPriceLabel').textContent = `$${totalUsd.toFixed(2)} USD`;
+      
+      animateValue('tomanCounter', previousToman, rawToman, 300);
+      previousToman = rawToman;
+
+      const formattedBtn = `${rawToman.toLocaleString('en-US')} T`;
+      document.getElementById('btnPriceBadge').textContent = formattedBtn;
+
+      // Update Telegram Native MainButton if present
+      if (tg?.MainButton) {
+        tg.MainButton.setText(`تأیید خرید ${currentStars.toLocaleString('en-US')} استارز (${formattedBtn})`);
+        tg.MainButton.show();
+      }
+    }
+
+    // =========================================================================
+    // Order Submission & Telegram WebApp Bridge
+    // =========================================================================
+    async function submitOrder() {
+      triggerHaptic('heavy');
+      const orderData = {
+        type: 'buy_stars',
+        stars: currentStars,
+        target_user: currentUserId,
+        target_username: currentUsername,
+      };
+
+      // 1. If running inside Telegram, send data via Native WebApp Bridge
+      if (tg && typeof tg.sendData === 'function') {
+        try {
+          tg.sendData(JSON.stringify(orderData));
+          tg.close();
+          return;
+        } catch (e) {
+          console.warn('sendData failed, attempting API fallback:', e);
+        }
+      }
+
+      // 2. Dual-path API fallback
+      const btn = document.getElementById('orderBtn');
+      btn.innerHTML = '<span>⏳ در حال ثبت فاکتور...</span>';
+      btn.disabled = true;
+
+      try {
+        const resp = await fetch('/api/stars/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+        const res = await resp.json();
+        if (res.status === 'success') {
+          btn.innerHTML = '<span>✅ فاکتور در ربات صادر شد!</span>';
+          setTimeout(() => {
+            if (tg) tg.close();
+            else alert(`سفارش #${res.order_id} با موفقیت ثبت گردید. لطفاً به بات تلگرام مراجعه نمایید.`);
+          }, 600);
+        } else {
+          alert('خطا در ثبت سفارش: ' + (res.message || 'نامشخص'));
+          btn.innerHTML = '<span>تأیید و پرداخت نهایی</span>';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alert('ارتباط با سرور برقرار نشد.');
+        btn.innerHTML = '<span>تأیید و پرداخت نهایی</span>';
+        btn.disabled = false;
+      }
+    }
+
+    // Bind Telegram native MainButton
+    if (tg?.MainButton) {
+      tg.MainButton.onClick(submitOrder);
+    }
+
+    // Initial calculation run
+    updateCalculations();
+  </script>
+</body>
+</html>
